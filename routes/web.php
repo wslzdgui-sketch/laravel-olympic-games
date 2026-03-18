@@ -13,6 +13,10 @@ Route::get('/users', function () {
     return view('users.index', compact('users'));
 });
 
+Route::get('/exo3', function () {
+    $users = User::all();
+    return view('exo3', compact('users'));
+});
 
 Route::post('/recap', function (Request $request) {
     return view('fakemarketViews.recap', [
