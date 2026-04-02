@@ -15,14 +15,8 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Create a couple of predictable users so the list is not empty.
-        User::firstOrCreate([
-            'email' => 'test@example.com',
-        ], [
-            'name' => 'Test User',
+        $this->call([
+            DisciplineSeeder::class,
         ]);
-
-        // Add a few more fake users for demo purposes.
-        User::factory(4)->create();
     }
 }
