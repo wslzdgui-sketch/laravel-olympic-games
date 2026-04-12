@@ -9,6 +9,11 @@ class DisciplineController extends Controller
 {
     public function index(Request $request)
     {
+        return view('welcome');
+    }
+
+    public function calendrier(Request $request)
+    {
         $allCompetitions = Discipline::all();
         $sports = $allCompetitions->pluck('nom')->unique();
         $lieux = $allCompetitions->pluck('lieu')->unique();
@@ -25,6 +30,6 @@ class DisciplineController extends Controller
 
         $competitions = $query->get();
 
-        return view('welcome', compact('competitions', 'sports', 'lieux'));
+        return view('calendrier', compact('competitions', 'sports', 'lieux'));
     }
 }

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>JO d'Hiver | Accueil</title>
+    <title>JO d'Hiver | Confirmation de réservation</title>
 
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="{{ asset('css/acceuil.css') }}">
@@ -21,7 +21,7 @@
 
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow">
   <div class="container-fluid">
-  
+
   <a class="navbar-brand fw-bold d-flex align-items-center" href="{{ url('/') }}">
     <div class="bg-white rounded-circle d-flex justify-content-center align-items-center" style="width: 50px; height: 50px;">
         <img src="{{ asset('picture/logojo.png') }}" alt="Logo JO" width="30" height="30">
@@ -42,7 +42,7 @@
     <div class="collapse navbar-collapse" id="navbarNav">
       <ul class="navbar-nav ms-auto">
         <li class="nav-item position-relative">
-          <a class="nav-link position-relative text-dark fw-bold active" href="{{ url('/') }}">
+          <a class="nav-link position-relative text-dark fw-bold" href="{{ url('/') }}">
             <span class="bg-circle position-absolute"></span>
             Accueil
           </a>
@@ -70,54 +70,47 @@
   </div>
 </nav>
 
-<div class="container mt-5 flex-grow-1">
-  <div class="tab-content">
-
-    <div class="card shadow border-0">
-      <div class="card-body">
-        <h2>🏠 Accueil</h2>
-        <p>Bienvenue aux Jeux Olympiques d'Hiver 2026 à Milan ! Explorez le calendrier des compétitions, réservez vos tickets et découvrez une expérience inoubliable.</p>
-      </div>
-    </div>
-  </div>
-</div>
-
 <div class="container mt-5">
-  <div class="row g-4 justify-content-center">
+  <div class="card shadow border-0">
+    <div class="card-body">
+      <h2 class="mb-4 text-success">✅ Confirmation de réservation</h2>
 
-    <div class="col-auto">
-      <div class="card h-100 shadow-sm" style="width: 180px;">
-        <img src="https://images.unsplash.com/photo-1533743048612-bf990dafe257?q=80&w=1160&auto=format&fit=crop" 
-             class="card-img-top" style="height: 100px; object-fit: cover;" alt="Image 1">
-        <div class="card-body text-center">
-          <h5 class="card-title fs-6 fw-bold">Des voyages remplis de libertés</h5>
-          <p class="card-text small text-muted">Découvrez des lieux uniques et vivez des expériences inoubliables au cœur des Jeux Olympiques 2026</p>
+      <div class="alert alert-success">
+        <h4 class="alert-heading">Réservation confirmée !</h4>
+        <p>Votre réservation a été enregistrée avec succès. Un email de confirmation vous sera envoyé sous peu.</p>
+      </div>
+
+      <h4>Récapitulatif</h4>
+      <div class="row">
+        <div class="col-md-6">
+          <h5>Informations personnelles</h5>
+          <p><strong>Nom :</strong> {{ $reservation->first_name }} {{ $reservation->last_name }}</p>
+          <p><strong>Email :</strong> {{ $reservation->email }}</p>
+          <p><strong>Téléphone :</strong> {{ $reservation->phone }}</p>
+        </div>
+        <div class="col-md-6">
+          <h5>Compétitions réservées</h5>
+          @foreach($reservation->competitions as $comp)
+            @php
+              $discipline = \App\Models\Discipline::find($comp['id']);
+            @endphp
+            <p>{{ $discipline->nom }} - {{ $discipline->titre }} ({{ $comp['quantity'] }} billet(s) - {{ $comp['price'] }} € chacun)</p>
+          @endforeach
+          <h5>Personnes</h5>
+          <ul>
+            @foreach($reservation->people as $person)
+              <li>{{ $person }}</li>
+            @endforeach
+          </ul>
+          <p class="text-primary fw-bold">Prix total : {{ $reservation->total_price }} €</p>
         </div>
       </div>
-    </div>
 
-    <div class="col-auto">
-      <div class="card h-100 shadow-sm" style="width: 180px;">
-        <img src="https://images.unsplash.com/photo-1549896869-ca27eeffe4fb?q=80&w=774&auto=format&fit=crop" 
-             class="card-img-top" style="height: 100px; object-fit: cover;" alt="Image 2">
-        <div class="card-body text-center">
-          <h5 class="card-title fs-6 fw-bold">De nouveaux terrains à découvrir</h5>
-          <p class="card-text small text-muted">Découvrez des endroits que seuls les courageux osent fouler, où chaque descente devient un souvenir gravé à jamais.</p>
-        </div>
+      <div class="mt-4">
+        <a href="{{ url('/') }}" class="btn btn-primary">Retour à l'accueil</a>
+        <a href="{{ url('/billetterie') }}" class="btn btn-secondary">Nouvelle réservation</a>
       </div>
     </div>
-
-    <div class="col-auto">
-      <div class="card h-100 shadow-sm" style="width: 180px;">
-        <img src="https://images.unsplash.com/photo-1639843091936-bb5fca7b5684?q=80&w=1160&auto=format&fit=crop" 
-             class="card-img-top" style="height: 100px; object-fit: cover;" alt="Image 3">
-        <div class="card-body text-center">
-          <h5 class="card-title fs-6 fw-bold">Dépassez vos limites</h5>
-          <p class="card-text small text-muted">Sentez votre cœur s’emballer, vos muscles vibrer, et chaque action vous rapprocher de repousser vos limites</p>
-        </div>
-      </div>
-    </div>
-
   </div>
 </div>
 
@@ -128,8 +121,6 @@
         </small>
     </div>
 </footer>
-
-</div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 
