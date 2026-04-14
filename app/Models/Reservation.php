@@ -13,13 +13,11 @@ class Reservation extends Model
         'email',
         'phone',
         'competitions',
-        'people',
         'total_price',
     ];
 
     protected $casts = [
         'competitions' => 'array',
-        'people' => 'array',
     ];
 
     public function spectators(): HasMany

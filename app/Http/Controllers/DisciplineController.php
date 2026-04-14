@@ -2,7 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Discipline;
+use App\Models\Sport;
+use App\Models\Tour;
 use Illuminate\Http\Request;
 
 class DisciplineController extends Controller
@@ -14,22 +15,21 @@ class DisciplineController extends Controller
 
     public function calendrier(Request $request)
     {
-        $allCompetitions = Discipline::all();
-        $sports = $allCompetitions->pluck('nom')->unique();
-        $lieux = $allCompetitions->pluck('lieu')->unique();
+        $sports = Sport::orderBy('nom')->get();
+        $venues = \App\Models\Venue::orderBy('name')->get();
 
-        $query = Discipline::orderBy('jour')->orderBy('heure_debut');
+        $query = Tour::with(['sport', 'venue'])->orderBy('jour')->orderBy('heure_debut');
 
-        if ($request->filled('sport') && $request->sport !== 'all') {
-            $query->where('nom', $request->sport);
+        if ($request->filled('sport_id') && $request->sport_id !== 'all') {
+            $query->where('sport_id', $request->sport_id);
         }
 
-        if ($request->filled('lieu') && $request->lieu !== 'all') {
-            $query->where('lieu', $request->lieu);
+        if ($request->filled('venue_id') && $request->venue_id !== 'all') {
+            $query->where('venue_id', $request->venue_id);
         }
 
-        $competitions = $query->get();
+        $tours = $query->get();
 
-        return view('calendrier', compact('competitions', 'sports', 'lieux'));
+        return view('calendrier', compact('tours', 'sports', 'venues'));
     }
 }

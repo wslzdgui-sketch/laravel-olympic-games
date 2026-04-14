@@ -7,7 +7,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Spectator extends Model
 {
-    protected $fillable = ['first_name', 'last_name', 'phone', 'email', 'reservation_id'];
+    protected $fillable = [
+        'reservation_id',
+        'first_name',
+        'last_name',
+        'email',
+        'phone',
+    ];
 
     public function reservation(): BelongsTo
     {

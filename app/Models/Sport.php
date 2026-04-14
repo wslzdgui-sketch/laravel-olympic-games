@@ -5,9 +5,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class Venue extends Model
+class Sport extends Model
 {
-    protected $fillable = ['name', 'capacity'];
+    protected $fillable = ['nom'];
 
     public function tours(): HasMany
     {

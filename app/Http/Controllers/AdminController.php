@@ -2,101 +2,123 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Discipline;
-use App\Models\Reservation;
+use App\Models\Sport;
+use App\Models\Tour;
 use App\Models\Venue;
+use App\Models\Reservation;
 use Illuminate\Http\Request;
 
 class AdminController extends Controller
 {
     public function dashboard()
     {
-        $disciplines = Discipline::with('venue')->get();
+        $tours        = Tour::with(['sport', 'venue'])->orderBy('jour')->orderBy('heure_debut')->get();
         $reservations = Reservation::with('spectators')->get();
-        $venues = Venue::all();
+        $venues       = Venue::orderBy('name')->get();
+        $sports       = Sport::orderBy('nom')->get();
 
+        // Calcul spectateurs et places disponibles par tour
         $statistics = [];
-        foreach ($disciplines as $discipline) {
+        foreach ($tours as $tour) {
             $spectatorCount = 0;
             foreach ($reservations as $reservation) {
-                $competitions = $reservation->competitions;
-                foreach ($competitions as $comp) {
-                    if ($comp['id'] == $discipline->id) {
+                foreach ($reservation->competitions as $comp) {
+                    if ($comp['tour_id'] == $tour->id) {
                         $spectatorCount += $comp['quantity'];
                     }
                 }
             }
-
-            $availableSpots = $discipline->venue ? ($discipline->venue->capacity - $spectatorCount) : 0;
+            $capacity       = $tour->venue ? $tour->venue->capacity : 0;
+            $available      = $capacity - $spectatorCount;
 
             $statistics[] = [
-                'discipline' => $discipline,
+                'tour'       => $tour,
                 'spectators' => $spectatorCount,
-                'available' => $availableSpots,
+                'capacity'   => $capacity,
+                'available'  => $available,
             ];
         }
 
-        return view('organizer.dashboard', compact('disciplines', 'reservations', 'venues', 'statistics'));
+        $totalSpectateurs = array_sum(array_column($statistics, 'spectators'));
+
+        return view('organizer.dashboard', compact(
+            'tours', 'reservations', 'venues', 'sports', 'statistics', 'totalSpectateurs'
+        ));
     }
 
-    public function createDiscipline()
+    // ── Créer un tour de compétition ──────────────────────────────────────────
+    public function createTour()
     {
-        $venues = Venue::all();
-        return view('organizer.create-discipline', compact('venues'));
+        $sports = Sport::orderBy('nom')->get();
+        $venues = Venue::orderBy('name')->get();
+        return view('organizer.create-tour', compact('sports', 'venues'));
     }
 
-    public function storeDiscipline(Request $request)
-    {
-        $request->validate([
-            'nom' => 'required|string',
-            'titre' => 'required|string',
-            'lieu' => 'required|string',
-            'jour' => 'required|date',
-            'heure_debut' => 'required|date_format:H:i',
-            'heure_fin' => 'required|date_format:H:i',
-            'prix' => 'required|numeric',
-            'venue_id' => 'required|exists:venues,id',
-        ]);
-
-        Discipline::create($request->all());
-
-        return redirect()->route('admin.dashboard')->with('success', 'Compétition créée avec succès');
-    }
-
-    public function editDiscipline(Discipline $discipline)
-    {
-        $venues = Venue::all();
-        return view('organizer.edit-discipline', compact('discipline', 'venues'));
-    }
-
-    public function updateDiscipline(Request $request, Discipline $discipline)
+    public function storeTour(Request $request)
     {
         $request->validate([
-            'nom' => 'required|string',
-            'titre' => 'required|string',
-            'lieu' => 'required|string',
-            'jour' => 'required|date',
+            'sport_id'    => 'required|exists:sports,id',
+            'venue_id'    => 'required|exists:venues,id',
+            'titre'       => 'required|string|max:100',
+            'jour'        => 'required|date',
             'heure_debut' => 'required|date_format:H:i',
-            'heure_fin' => 'required|date_format:H:i',
-            'prix' => 'required|numeric',
-            'venue_id' => 'required|exists:venues,id',
+            'heure_fin'   => 'required|date_format:H:i|after:heure_debut',
+            'prix'        => 'required|numeric|min:0',
         ]);
 
-        $discipline->update($request->all());
+        Tour::create($request->only([
+            'sport_id', 'venue_id', 'titre', 'jour', 'heure_debut', 'heure_fin', 'prix',
+        ]));
 
-        return redirect()->route('admin.dashboard')->with('success', 'Compétition modifiée avec succès');
+        return redirect()->route('admin.dashboard')
+            ->with('success', 'Compétition créée avec succès.');
     }
 
-    public function deleteDiscipline(Discipline $discipline)
+    // ── Modifier un tour ──────────────────────────────────────────────────────
+    public function editTour(Tour $tour)
     {
-        $discipline->delete();
-
-        return redirect()->route('admin.dashboard')->with('success', 'Compétition supprimée avec succès');
+        $sports = Sport::orderBy('nom')->get();
+        $venues = Venue::orderBy('name')->get();
+        return view('organizer.edit-tour', compact('tour', 'sports', 'venues'));
     }
 
+    public function updateTour(Request $request, Tour $tour)
+    {
+        $request->validate([
+            'sport_id'    => 'required|exists:sports,id',
+            'venue_id'    => 'required|exists:venues,id',
+            'titre'       => 'required|string|max:100',
+            'jour'        => 'required|date',
+            'heure_debut' => 'required|date_format:H:i',
+            'heure_fin'   => 'required|date_format:H:i|after:heure_debut',
+            'prix'        => 'required|numeric|min:0',
+        ]);
+
+        $tour->update($request->only([
+            'sport_id', 'venue_id', 'titre', 'jour', 'heure_debut', 'heure_fin', 'prix',
+        ]));
+
+        return redirect()->route('admin.dashboard')
+            ->with('success', 'Compétition modifiée avec succès.');
+    }
+
+    // ── Supprimer un tour ─────────────────────────────────────────────────────
+    public function deleteTour(Tour $tour)
+    {
+        $tour->delete();
+
+        return redirect()->route('admin.dashboard')
+            ->with('success', 'Compétition supprimée avec succès.');
+    }
+
+    // ── Toutes les réservations ───────────────────────────────────────────────
     public function viewReservations()
     {
-        $reservations = Reservation::with('spectators')->paginate(15);
-        return view('organizer.reservations', compact('reservations'));
+        $reservations = Reservation::with('spectators')->latest()->paginate(15);
+
+        // Charger les tours pour chaque réservation
+        $toursMap = Tour::with(['sport', 'venue'])->get()->keyBy('id');
+
+        return view('organizer.reservations', compact('reservations', 'toursMap'));
     }
 }

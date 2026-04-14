@@ -6,27 +6,23 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
-        Schema::create('spectators', function (Blueprint $table) {
+        Schema::create('reservations', function (Blueprint $table) {
             $table->id();
             $table->string('first_name');
             $table->string('last_name');
-            $table->string('phone');
             $table->string('email');
-            $table->foreignId('reservation_id')->constrained('reservations')->onDelete('cascade');
+            $table->string('phone');
+            // JSON array: [{ "tour_id": 1, "quantity": 2, "price": 45.00 }, ...]
+            $table->json('competitions');
+            $table->decimal('total_price', 8, 2);
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
-        Schema::dropIfExists('spectators');
+        Schema::dropIfExists('reservations');
     }
 };

@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>JO d'Hiver | Billetterie</title>
-
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="{{ asset('css/acceuil.css') }}">
     <link rel="icon" href="{{ asset('picture/logojo.png') }}" type="image/png">
@@ -21,48 +20,40 @@
 
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow">
   <div class="container-fluid">
-
-  <a class="navbar-brand fw-bold d-flex align-items-center" href="{{ url('/') }}">
-    <div class="bg-white rounded-circle d-flex justify-content-center align-items-center" style="width: 50px; height: 50px;">
+    <a class="navbar-brand fw-bold d-flex align-items-center" href="{{ url('/') }}">
+      <div class="bg-white rounded-circle d-flex justify-content-center align-items-center" style="width:50px;height:50px;">
         <img src="{{ asset('picture/logojo.png') }}" alt="Logo JO" width="30" height="30">
-    </div>
-    <span class="ms-2 text-white">JO d'Hiver</span>
-  </a>
-
+      </div>
+      <span class="ms-2 text-white">JO d'Hiver</span>
+    </a>
     <div class="text-white header-values d-none d-lg-block">
-        <span>📍 Milan</span>
-        <span>📅 1 - 15 Février</span>
-        <span>🎫 Ouvert</span>
+      <span>📍 Milan</span>
+      <span>📅 1 - 15 Février</span>
+      <span>🎫 Ouvert</span>
     </div>
-
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
       <span class="navbar-toggler-icon"></span>
     </button>
-
     <div class="collapse navbar-collapse" id="navbarNav">
       <ul class="navbar-nav ms-auto">
         <li class="nav-item position-relative">
           <a class="nav-link position-relative text-dark fw-bold" href="{{ url('/') }}">
-            <span class="bg-circle position-absolute"></span>
-            Accueil
+            <span class="bg-circle position-absolute"></span>Accueil
           </a>
         </li>
         <li class="nav-item position-relative">
-          <a class="nav-link position-relative text-dark fw-bold" href="{{ url('/calendrier') }}">
-            <span class="bg-circle position-absolute"></span>
-            Calendrier
+          <a class="nav-link position-relative text-dark fw-bold" href="{{ route('calendrier') }}">
+            <span class="bg-circle position-absolute"></span>Calendrier
           </a>
         </li>
         <li class="nav-item position-relative">
-          <a class="nav-link position-relative text-dark fw-bold active" href="{{ url('/billetterie') }}">
-            <span class="bg-circle position-absolute"></span>
-            Billetterie
+          <a class="nav-link position-relative text-dark fw-bold active" href="{{ route('billetterie') }}">
+            <span class="bg-circle position-absolute"></span>Billetterie
           </a>
         </li>
         <li class="nav-item position-relative">
           <a class="nav-link position-relative text-dark fw-bold" href="{{ route('organizer.login') }}">
-            <span class="bg-circle position-absolute"></span>
-            Organisateurs
+            <span class="bg-circle position-absolute"></span>Organisateurs
           </a>
         </li>
       </ul>
@@ -71,235 +62,289 @@
 </nav>
 
 <div class="container mt-5">
-  <div class="card shadow border-0">
+
+  @if($errors->any())
+    <div class="alert alert-danger alert-dismissible fade show">
+      <ul class="mb-0">
+        @foreach($errors->all() as $error)
+          <li>{{ $error }}</li>
+        @endforeach
+      </ul>
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+  @endif
+
+  {{-- Filtre prix --}}
+  <div class="card shadow border-0 mb-4">
     <div class="card-body">
-      <h2 class="mb-4">🎫 Billetterie</h2>
-
-      <form method="GET" action="{{ url('/billetterie') }}" class="mb-4">
-        <div class="row g-3">
-          <div class="col-md-4">
-            <label for="prix_min" class="form-label">Prix minimum</label>
-            <input type="number" step="0.01" name="prix_min" id="prix_min" class="form-control" value="{{ request('prix_min') }}">
-          </div>
-          <div class="col-md-4">
-            <label for="prix_max" class="form-label">Prix maximum</label>
-            <input type="number" step="0.01" name="prix_max" id="prix_max" class="form-control" value="{{ request('prix_max') }}">
-          </div>
-          <div class="col-md-4 d-flex align-items-end">
-            <button type="submit" class="btn btn-primary me-2">Filtrer</button>
-            <a href="{{ url('/billetterie') }}" class="btn btn-outline-secondary">Réinitialiser</a>
-          </div>
+      <h5 class="mb-3">🔍 Filtrer par prix</h5>
+      <form method="GET" action="{{ route('billetterie') }}" class="row g-3">
+        <div class="col-md-4">
+          <label class="form-label">Prix minimum (€)</label>
+          <input type="number" step="0.01" name="prix_min" class="form-control" value="{{ request('prix_min') }}" placeholder="0">
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Prix maximum (€)</label>
+          <input type="number" step="0.01" name="prix_max" class="form-control" value="{{ request('prix_max') }}" placeholder="200">
+        </div>
+        <div class="col-md-4 d-flex align-items-end gap-2">
+          <button type="submit" class="btn btn-primary">Filtrer</button>
+          <a href="{{ route('billetterie') }}" class="btn btn-outline-secondary">Réinitialiser</a>
         </div>
       </form>
+    </div>
+  </div>
 
-      <form id="reservationForm" method="POST" action="{{ url('/reservation') }}">
-        @csrf
-        <div class="row">
-          <div class="col-md-8">
-            <h4>Disciplines disponibles</h4>
-            @foreach($disciplines as $discipline)
-            <div class="card mb-3">
-              <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
-                  <div>
-                    <h5 class="card-title">{{ $discipline->nom }} - {{ $discipline->titre }}</h5>
-                    <p class="card-text">{{ $discipline->lieu }} - {{ \Carbon\Carbon::parse($discipline->jour)->format('d/m/Y') }} à {{ \Carbon\Carbon::parse($discipline->heure_debut)->format('H:i') }}</p>
-                    <p class="text-primary fw-bold">{{ $discipline->prix }} €</p>
-                  </div>
-                  <div class="form-check">
-                    <input class="form-check-input competition-checkbox" type="checkbox" name="competitions[{{ $discipline->id }}][selected]" value="1" id="comp_{{ $discipline->id }}">
-                    <label class="form-check-label" for="comp_{{ $discipline->id }}">
-                      Sélectionner
-                    </label>
+  <div class="row">
+    {{-- Liste des tours disponibles --}}
+    <div class="col-lg-8">
+      <div class="card shadow border-0">
+        <div class="card-body">
+          <h4 class="mb-4">🏅 Compétitions disponibles</h4>
+
+          @if($tours->count() > 0)
+            @foreach($tours->groupBy(fn($t) => $t->sport->nom) as $sportNom => $toursSport)
+              <h6 class="text-primary fw-bold mt-3 mb-2 border-bottom pb-1">{{ $sportNom }}</h6>
+              @foreach($toursSport as $tour)
+                @php $dispo = $placesDisponibles[$tour->id] ?? 0; @endphp
+                <div class="card mb-2 {{ $dispo == 0 ? 'border-danger opacity-75' : 'border-light' }}" id="tour-card-{{ $tour->id }}">
+                  <div class="card-body py-2">
+                    <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+                      <div>
+                        <span class="fw-bold">{{ $tour->titre }}</span>
+                        <span class="text-muted small ms-2">
+                          {{ \Carbon\Carbon::parse($tour->jour)->format('d/m/Y') }}
+                          {{ \Carbon\Carbon::parse($tour->heure_debut)->format('H:i') }} – {{ \Carbon\Carbon::parse($tour->heure_fin)->format('H:i') }}
+                        </span>
+                        <br>
+                        <span class="text-muted small">📍 {{ $tour->venue->name }}</span>
+                        @if($dispo > 0)
+                          <span class="badge bg-light text-muted small ms-2">{{ $dispo }} place(s) restante(s)</span>
+                        @else
+                          <span class="badge bg-danger ms-2">COMPLET</span>
+                        @endif
+                      </div>
+                      <div class="d-flex align-items-center gap-2">
+                        <span class="text-primary fw-bold">{{ number_format($tour->prix, 2) }} €</span>
+                        @if($dispo > 0)
+                          <div class="form-check mb-0">
+                            <input class="form-check-input tour-checkbox"
+                                   type="checkbox"
+                                   id="tour_{{ $tour->id }}"
+                                   data-tour-id="{{ $tour->id }}"
+                                   data-prix="{{ $tour->prix }}"
+                                   data-nom="{{ $tour->sport->nom }} – {{ $tour->titre }}">
+                            <label class="form-check-label" for="tour_{{ $tour->id }}">Sélectionner</label>
+                          </div>
+                          <input type="number"
+                                 class="form-control form-control-sm qty-input"
+                                 id="qty_{{ $tour->id }}"
+                                 style="width:70px;display:none"
+                                 min="1"
+                                 max="{{ $dispo }}"
+                                 value="1"
+                                 data-tour-id="{{ $tour->id }}">
+                        @endif
+                      </div>
+                    </div>
                   </div>
                 </div>
-                <div class="quantity-input mt-2" style="display: none;">
-                  <label>Quantité:</label>
-                  <input type="number" name="competitions[{{ $discipline->id }}][quantity]" min="1" value="1" class="form-control d-inline-block w-auto">
-                  <input type="hidden" name="competitions[{{ $discipline->id }}][id]" value="{{ $discipline->id }}">
-                </div>
-              </div>
-            </div>
+              @endforeach
             @endforeach
-          </div>
+          @else
+            <div class="alert alert-secondary">Aucune compétition disponible pour ces critères.</div>
+          @endif
+        </div>
+      </div>
+    </div>
 
-          <div class="col-md-4">
-            <h4>Informations de réservation</h4>
-            <div class="mb-3">
-              <label for="first_name" class="form-label">Prénom</label>
-              <input type="text" class="form-control" id="first_name" name="first_name" required>
-            </div>
-            <div class="mb-3">
-              <label for="last_name" class="form-label">Nom</label>
-              <input type="text" class="form-control" id="last_name" name="last_name" required>
-            </div>
-            <div class="mb-3">
-              <label for="email" class="form-label">Email</label>
-              <input type="email" class="form-control" id="email" name="email" required>
-            </div>
-            <div class="mb-3">
-              <label for="phone" class="form-label">Téléphone</label>
-              <input type="tel" class="form-control" id="phone" name="phone" required>
-            </div>
+    {{-- Panier + formulaire --}}
+    <div class="col-lg-4 mt-4 mt-lg-0">
 
-            <div id="peopleSection" style="display: none;">
-              <h5>Noms des personnes</h5>
-              <div id="peopleInputs">
-                <div class="mb-2">
-                  <input type="text" class="form-control" name="people[]" placeholder="Nom de la personne 1" required>
-                </div>
-              </div>
-              <button type="button" id="addPerson" class="btn btn-sm btn-outline-primary">Ajouter une personne</button>
-            </div>
-
-            <button type="submit" class="btn btn-success w-100 mt-3" id="submitBtn" style="display: none;">Réserver</button>
+      {{-- Panier --}}
+      <div class="card shadow border-0 mb-4" id="panier-card" style="display:none!important">
+        <div class="card-body">
+          <h5>🛒 Panier</h5>
+          <div id="panier-items"></div>
+          <hr>
+          <div class="d-flex justify-content-between fw-bold">
+            <span>Total :</span>
+            <span id="panier-total">0,00 €</span>
           </div>
         </div>
-      </form>
+      </div>
+
+      {{-- Formulaire de réservation --}}
+      <div class="card shadow border-0" id="form-card" style="display:none!important">
+        <div class="card-body">
+          <h5 class="mb-3">📋 Vos informations</h5>
+          <form id="reservationForm" method="POST" action="{{ route('reservation.store') }}">
+            @csrf
+
+            <div class="mb-2">
+              <label class="form-label">Prénom <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" name="first_name" value="{{ old('first_name') }}" required>
+            </div>
+            <div class="mb-2">
+              <label class="form-label">Nom <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" name="last_name" value="{{ old('last_name') }}" required>
+            </div>
+            <div class="mb-2">
+              <label class="form-label">Email <span class="text-danger">*</span></label>
+              <input type="email" class="form-control" name="email" value="{{ old('email') }}" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Téléphone <span class="text-danger">*</span></label>
+              <input type="tel" class="form-control" name="phone" value="{{ old('phone') }}" required>
+            </div>
+
+            {{-- Noms des spectateurs (injectés via JS) --}}
+            <div id="spectators-section" style="display:none">
+              <h6 class="mt-3 mb-2">👥 Noms des spectateurs</h6>
+              <div id="spectators-inputs"></div>
+            </div>
+
+            {{-- Champs cachés competitions injectés via JS --}}
+            <div id="competitions-inputs"></div>
+
+            <button type="submit" class="btn btn-success w-100 mt-3" id="submit-btn">
+              ✅ Confirmer la réservation
+            </button>
+          </form>
+        </div>
+      </div>
+
     </div>
   </div>
 </div>
 
 <footer class="bg-dark text-center text-white py-3 mt-5">
-    <div class="container">
-        <small>
-            © 2026 JO d'Hiver | Projet étudiant | Contact : contact@jo-hiver.fr
-        </small>
-    </div>
+  <div class="container">
+    <small>© 2026 JO d'Hiver | Projet étudiant | Contact : contact@jo-hiver.fr</small>
+  </div>
 </footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const checkboxes = document.querySelectorAll('.competition-checkbox');
-    const submitBtn = document.getElementById('submitBtn');
-    const peopleSection = document.getElementById('peopleSection');
-    const addPersonBtn = document.getElementById('addPerson');
-    const peopleInputs = document.getElementById('peopleInputs');
-    const reservationForm = document.getElementById('reservationForm');
+// ── Panier en mémoire ──────────────────────────────────────────────────────────
+const panier = {}; // { tourId: { nom, prix, qty } }
 
-    function updateForm() {
-        const checkedBoxes = document.querySelectorAll('.competition-checkbox:checked');
-        const isAnyChecked = checkedBoxes.length > 0;
+function updatePanier() {
+    const panierCard = document.getElementById('panier-card');
+    const formCard   = document.getElementById('form-card');
+    const panierItems = document.getElementById('panier-items');
+    const panierTotal = document.getElementById('panier-total');
+    const specSection = document.getElementById('spectators-section');
+    const specInputs  = document.getElementById('spectators-inputs');
+    const compInputs  = document.getElementById('competitions-inputs');
 
-        submitBtn.style.display = isAnyChecked ? 'block' : 'none';
-        peopleSection.style.display = isAnyChecked ? 'block' : 'none';
+    const items = Object.values(panier);
 
-        // Update people inputs count based on total quantity
-        let totalQuantity = 0;
-        checkedBoxes.forEach(cb => {
-            const quantityInput = cb.closest('.card-body').querySelector('input[name*="[quantity]"]');
-            if (quantityInput) {
-                totalQuantity += parseInt(quantityInput.value) || 0;
-            }
-        });
+    if (items.length === 0) {
+        panierCard.style.setProperty('display', 'none', 'important');
+        formCard.style.setProperty('display', 'none', 'important');
+        return;
+    }
 
-        // Adjust people inputs
-        const currentInputs = peopleInputs.querySelectorAll('input[name="people[]"]');
-        if (totalQuantity > currentInputs.length) {
-            for (let i = currentInputs.length; i < totalQuantity; i++) {
-                const div = document.createElement('div');
-                div.className = 'mb-2';
-                div.innerHTML = '<input type="text" class="form-control" name="people[]" placeholder="Nom de la personne ' + (i + 1) + '" required>';
-                peopleInputs.appendChild(div);
-            }
-        } else if (totalQuantity < currentInputs.length) {
-            for (let i = currentInputs.length - 1; i >= totalQuantity; i--) {
-                currentInputs[i].parentElement.remove();
-            }
+    // Afficher panier et formulaire
+    panierCard.style.removeProperty('display');
+    formCard.style.removeProperty('display');
+
+    // Total quantité de billets
+    const totalQty = items.reduce((s, i) => s + i.qty, 0);
+
+    // Rendre les items du panier
+    panierItems.innerHTML = items.map(item => `
+        <div class="d-flex justify-content-between align-items-center mb-1 small">
+            <span>${item.nom}</span>
+            <span class="text-muted">${item.qty} × ${parseFloat(item.prix).toFixed(2)} €</span>
+        </div>
+    `).join('');
+
+    // Total
+    const total = items.reduce((s, i) => s + i.prix * i.qty, 0);
+    panierTotal.textContent = total.toFixed(2).replace('.', ',') + ' €';
+
+    // Champs cachés competitions[]
+    compInputs.innerHTML = '';
+    let idx = 0;
+    Object.entries(panier).forEach(([tourId, item]) => {
+        compInputs.innerHTML += `
+            <input type="hidden" name="competitions[${idx}][tour_id]" value="${tourId}">
+            <input type="hidden" name="competitions[${idx}][quantity]" value="${item.qty}">
+        `;
+        idx++;
+    });
+
+    // Champs spectateurs
+    specSection.style.display = 'block';
+    const currentInputs = specInputs.querySelectorAll('.spectator-row');
+    const currentCount  = currentInputs.length;
+
+    if (totalQty > currentCount) {
+        for (let i = currentCount; i < totalQty; i++) {
+            const div = document.createElement('div');
+            div.className = 'row g-1 mb-2 spectator-row';
+            div.innerHTML = `
+                <div class="col-6">
+                    <input type="text" class="form-control form-control-sm"
+                           name="spectators[${i}][first_name]"
+                           placeholder="Prénom ${i+1}" required>
+                </div>
+                <div class="col-6">
+                    <input type="text" class="form-control form-control-sm"
+                           name="spectators[${i}][last_name]"
+                           placeholder="Nom ${i+1}" required>
+                </div>
+            `;
+            specInputs.appendChild(div);
+        }
+    } else if (totalQty < currentCount) {
+        for (let i = currentCount - 1; i >= totalQty; i--) {
+            currentInputs[i].remove();
         }
     }
 
-    // Handle form submission to clean up data structure
-    reservationForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-
-        // Build clean competitions array
-        const competitionsData = [];
-        const checkedBoxes = document.querySelectorAll('.competition-checkbox:checked');
-        
-        checkedBoxes.forEach(cb => {
-            const disciplineId = cb.id.replace('comp_', '');
-            const quantityInput = cb.closest('.card-body').querySelector('input[name*="[quantity]"]');
-            const quantity = parseInt(quantityInput.value) || 1;
-
-            competitionsData.push({
-                id: disciplineId,
-                quantity: quantity
-            });
-        });
-
-        // Validate
-        if (competitionsData.length === 0) {
-            alert('Veuillez sélectionner au moins une compétition');
-            return;
-        }
-
-        // Create FormData
-        const formData = new FormData();
-        formData.append('_token', document.querySelector('input[name="_token"]').value);
-        formData.append('first_name', document.getElementById('first_name').value);
-        formData.append('last_name', document.getElementById('last_name').value);
-        formData.append('email', document.getElementById('email').value);
-        formData.append('phone', document.getElementById('phone').value);
-
-        // Add competitions
-        competitionsData.forEach((comp, index) => {
-            formData.append(`competitions[${index}][id]`, comp.id);
-            formData.append(`competitions[${index}][quantity]`, comp.quantity);
-        });
-
-        // Add people
-        const peopleInputs = document.querySelectorAll('input[name="people[]"]');
-        peopleInputs.forEach((input, index) => {
-            formData.append(`people[${index}]`, input.value);
-        });
-
-        // Submit
-        fetch('{{ url('/reservation') }}', {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => {
-            if (response.ok) {
-                return response.text();
-            }
-            throw new Error('Erreur lors de la réservation');
-        })
-        .then(html => {
-            document.body.innerHTML = html;
-        })
-        .catch(error => {
-            alert('Erreur: ' + error.message);
+    // Re-indexer les noms des champs spectateurs après suppression
+    specInputs.querySelectorAll('.spectator-row').forEach((row, i) => {
+        row.querySelectorAll('input').forEach(inp => {
+            inp.name = inp.name.replace(/spectators\[\d+\]/, `spectators[${i}]`);
+            inp.placeholder = inp.placeholder.replace(/\d+$/, i + 1);
         });
     });
+}
 
-    checkboxes.forEach(cb => {
-        cb.addEventListener('change', function() {
-            const quantityDiv = this.closest('.card-body').querySelector('.quantity-input');
-            if (this.checked) {
-                quantityDiv.style.display = 'block';
-            } else {
-                quantityDiv.style.display = 'none';
-            }
-            updateForm();
-        });
+// ── Événements checkboxes ──────────────────────────────────────────────────────
+document.querySelectorAll('.tour-checkbox').forEach(cb => {
+    cb.addEventListener('change', function () {
+        const tourId = this.dataset.tourId;
+        const qtyEl  = document.getElementById(`qty_${tourId}`);
 
-        const quantityInput = cb.closest('.card-body').querySelector('input[name*="[quantity]"]');
-        if (quantityInput) {
-            quantityInput.addEventListener('input', updateForm);
+        if (this.checked) {
+            qtyEl.style.display = 'inline-block';
+            panier[tourId] = {
+                nom:  this.dataset.nom,
+                prix: parseFloat(this.dataset.prix),
+                qty:  parseInt(qtyEl.value) || 1,
+            };
+        } else {
+            qtyEl.style.display = 'none';
+            delete panier[tourId];
         }
+        updatePanier();
     });
+});
 
-    addPersonBtn.addEventListener('click', function() {
-        const inputs = peopleInputs.querySelectorAll('input[name="people[]"]');
-        const div = document.createElement('div');
-        div.className = 'mb-2';
-        div.innerHTML = '<input type="text" class="form-control" name="people[]" placeholder="Nom de la personne ' + (inputs.length + 1) + '" required>';
-        peopleInputs.appendChild(div);
+// ── Événements quantités ───────────────────────────────────────────────────────
+document.querySelectorAll('.qty-input').forEach(inp => {
+    inp.addEventListener('input', function () {
+        const tourId = this.dataset.tourId;
+        if (panier[tourId]) {
+            panier[tourId].qty = Math.max(1, parseInt(this.value) || 1);
+            updatePanier();
+        }
     });
 });
 </script>
-
 </body>
 </html>
