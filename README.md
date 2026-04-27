@@ -58,6 +58,41 @@ If you discover a security vulnerability within Laravel, please send an e-mail t
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
 
+# Commandes a faire tourner pour l'installation : 
+
+
+# 1. Cloner le projet (si pas déjà fait)
+git clone <URL_DU_DEPOT> laravel-olympic-games
+cd laravel-olympic-games
+
+# 2. Installer les dépendances PHP
+composer install
+
+# 3. Installer les dépendances JS
+npm install
+
+# 4. Créer le fichier d'environnement
+cp .env.example .env 
+
+# 5. Générer la clé d'application Laravel
+php artisan key:generate
+
+# 6. Créer le fichier SQLite vide
+touch database/database.sqlite
+
+# 7. Vérifier que .env pointe bien vers SQLite
+#    Ouvrir .env et s'assurer d'avoir :
+#       DB_CONNECTION=sqlite
+#    (Commenter ou supprimer DB_HOST, DB_PORT, DB_DATABASE, DB_USERNAME, DB_PASSWORD)
+
+# 8. Lancer les migrations + seeder (UNE SEULE FOIS pour éviter les doublons)
+php artisan migrate:fresh --seed
+
+# 9. Compiler les assets (optionnel, Bootstrap est en CDN)
+npm run build
+
+# 10. Démarrer le serveur Laravel
+php artisan serve
 
 /users → liste + formulaire
 /exo3 → juste la liste (sans formulaire)
