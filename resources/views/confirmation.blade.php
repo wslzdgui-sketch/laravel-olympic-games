@@ -92,18 +92,18 @@
           <div class="card border-0 bg-light">
             <div class="card-body">
               <h5 class="card-title">🏅 Compétitions</h5>
-              @foreach($toursData as $item)
+              @foreach($reservation->tours as $tour)
                 <div class="mb-2 pb-2 border-bottom">
-                  <div class="fw-bold">{{ $item['tour']->sport->nom }} – {{ $item['tour']->titre }}</div>
+                  <div class="fw-bold">{{ $tour->sport->nom }} – {{ $tour->titre }}</div>
                   <div class="text-muted small">
-                    📅 {{ \Carbon\Carbon::parse($item['tour']->jour)->format('d/m/Y') }}
-                    {{ \Carbon\Carbon::parse($item['tour']->heure_debut)->format('H:i') }}
-                    – {{ \Carbon\Carbon::parse($item['tour']->heure_fin)->format('H:i') }}<br>
-                    📍 {{ $item['tour']->venue->name }}
+                    📅 {{ \Carbon\Carbon::parse($tour->jour)->format('d/m/Y') }}
+                    {{ \Carbon\Carbon::parse($tour->heure_debut)->format('H:i') }}
+                    – {{ \Carbon\Carbon::parse($tour->heure_fin)->format('H:i') }}<br>
+                    📍 {{ $tour->venue->name }}
                   </div>
                   <div class="small">
-                    {{ $item['quantity'] }} billet(s) × {{ number_format($item['price'], 2) }} €
-                    = <strong>{{ number_format($item['price'] * $item['quantity'], 2) }} €</strong>
+                    {{ $tour->pivot->quantity }} billet(s) × {{ number_format($tour->pivot->price, 2) }} €
+                    = <strong>{{ number_format($tour->pivot->price * $tour->pivot->quantity, 2) }} €</strong>
                   </div>
                 </div>
               @endforeach

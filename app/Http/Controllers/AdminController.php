@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Reservation;
 use App\Models\Sport;
 use App\Models\Tour;
 use App\Models\Venue;
-use App\Models\Reservation;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class AdminController extends Controller
 {
@@ -17,17 +18,15 @@ class AdminController extends Controller
         $venues       = Venue::orderBy('name')->get();
         $sports       = Sport::orderBy('nom')->get();
 
-        // Calcul spectateurs et places disponibles par tour
+        // Compter les spectateurs par tour via la table pivot (1 seule requête SQL agrégée)
+        $spectatorsByTour = DB::table('reservation_tour')
+            ->select('tour_id', DB::raw('SUM(quantity) as total'))
+            ->groupBy('tour_id')
+            ->pluck('total', 'tour_id');
+
         $statistics = [];
         foreach ($tours as $tour) {
-            $spectatorCount = 0;
-            foreach ($reservations as $reservation) {
-                foreach ($reservation->competitions as $comp) {
-                    if ($comp['tour_id'] == $tour->id) {
-                        $spectatorCount += $comp['quantity'];
-                    }
-                }
-            }
+            $spectatorCount = $spectatorsByTour[$tour->id] ?? 0;
             $capacity       = $tour->venue ? $tour->venue->capacity : 0;
             $available      = $capacity - $spectatorCount;
 
@@ -105,6 +104,12 @@ class AdminController extends Controller
     // ── Supprimer un tour ─────────────────────────────────────────────────────
     public function deleteTour(Tour $tour)
     {
+        // Empêche la suppression si des réservations existent (intégrité référentielle)
+        if ($tour->reservations()->exists()) {
+            return redirect()->route('admin.dashboard')
+                ->with('error', 'Impossible de supprimer ce tour : des réservations y sont associées.');
+        }
+
         $tour->delete();
 
         return redirect()->route('admin.dashboard')
@@ -114,11 +119,10 @@ class AdminController extends Controller
     // ── Toutes les réservations ───────────────────────────────────────────────
     public function viewReservations()
     {
-        $reservations = Reservation::with('spectators')->latest()->paginate(15);
+        $reservations = Reservation::with(['spectators', 'tours.sport', 'tours.venue'])
+            ->latest()
+            ->paginate(15);
 
-        // Charger les tours pour chaque réservation
-        $toursMap = Tour::with(['sport', 'venue'])->get()->keyBy('id');
-
-        return view('organizer.reservations', compact('reservations', 'toursMap'));
+        return view('organizer.reservations', compact('reservations'));
     }
 }

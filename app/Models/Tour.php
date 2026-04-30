@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Tour extends Model
 {
@@ -25,5 +26,12 @@ class Tour extends Model
     public function venue(): BelongsTo
     {
         return $this->belongsTo(Venue::class);
+    }
+
+    public function reservations(): BelongsToMany
+    {
+        return $this->belongsToMany(Reservation::class)
+            ->withPivot('quantity', 'price')
+            ->withTimestamps();
     }
 }

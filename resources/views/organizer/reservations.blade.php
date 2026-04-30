@@ -60,18 +60,13 @@
                   <td class="small">{{ $reservation->email }}</td>
                   <td class="small">{{ $reservation->phone }}</td>
                   <td>
-                    @foreach($reservation->competitions as $comp)
-                      @php $tour = $toursMap->get($comp['tour_id']); @endphp
-                      @if($tour)
-                        <div class="small">
-                          <span class="badge bg-primary">{{ $tour->sport->nom }}</span>
-                          <span class="badge bg-secondary">{{ $tour->titre }}</span>
-                          × {{ $comp['quantity'] }}
-                          <span class="text-muted">({{ \Carbon\Carbon::parse($tour->jour)->format('d/m/Y') }})</span>
-                        </div>
-                      @else
-                        <span class="badge bg-warning text-dark">Tour #{{ $comp['tour_id'] }} supprimé</span>
-                      @endif
+                    @foreach($reservation->tours as $tour)
+                      <div class="small">
+                        <span class="badge bg-primary">{{ $tour->sport->nom }}</span>
+                        <span class="badge bg-secondary">{{ $tour->titre }}</span>
+                        × {{ $tour->pivot->quantity }}
+                        <span class="text-muted">({{ \Carbon\Carbon::parse($tour->jour)->format('d/m/Y') }})</span>
+                      </div>
                     @endforeach
                   </td>
                   <td>
